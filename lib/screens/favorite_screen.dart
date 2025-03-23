@@ -70,6 +70,7 @@ class FavoriteScreen extends StatelessWidget {
                       Get.snackbar(
                         "Deleted",
                         "Book removed from favorites",
+                        colorText: Colors.blue,
                         duration: const Duration(seconds: 2),
                         snackPosition: SnackPosition.BOTTOM,
                       );

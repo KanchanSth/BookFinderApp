@@ -35,6 +35,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     bookController.fetchBooks(categories[_tabController.index]);
 
+//handle the tabview change through swipe
     _tabController.animation?.addListener(() {
       final newIndex = _tabController.animation?.value.round();
 
@@ -56,6 +57,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Book Finder App'),
+          centerTitle: true,
           actions: [
             IconButton(
               icon: const Icon(Icons.brightness_6),
@@ -68,21 +70,26 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         body: Column(
           children: [
             Obx(() {
-              if (bookController.isOffline.value) {
+              if (bookController.errorMessage.isNotEmpty) {
                 return Container(
-                  width: double.infinity,
-                  color: Colors.amber.shade100,
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
+                  margin: const EdgeInsets.only(bottom: 10),
+                  padding: const EdgeInsets.all(16),
+                  color: Colors.red.shade100,
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.wifi_off,
-                          size: 16, color: Colors.amber.shade900),
+                      const Icon(Icons.error, color: Colors.red),
                       hSizedBox0,
-                      Text(
-                        "You're offline.",
-                        style: TextStyle(color: Colors.amber.shade900),
+                      Expanded(
+                        child: Text(
+                          bookController.errorMessage.value,
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close, color: Colors.red),
+                        onPressed: () {
+                          bookController.errorMessage.value = "";
+                        },
                       ),
                     ],
                   ),
@@ -105,14 +112,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 }
 
                 if (bookController.isPopularBooksLoading.value) {
+                  //placeholder to show the loading effect
                   return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       vSizedBox0,
-                      const Text(
-                        "Popular Tech Books",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16),
+                      const Padding(
+                        padding: EdgeInsets.only(left: 12),
+                        child: Text(
+                          "Popular Tech Books",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 12),
+                        ),
                       ),
                       Container(
                         height: 190,
@@ -154,7 +166,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           ),
                         ),
                       ),
-                      // Add TabBar and TabBarView structure similar to non-loading state
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -201,17 +212,20 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 }
 
                 return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    vSizedBox0,
-                    const Text(
-                      "Popular Tech Books",
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    const Padding(
+                      padding: EdgeInsets.only(left: 12),
+                      child: Text(
+                        "Popular Tech Books",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 14),
+                      ),
                     ),
                     Container(
                       height: 190,
-                      padding: const EdgeInsets.all(10),
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
                       child: Obx(() {
                         return Skeletonizer(
                           enabled: false,
@@ -226,56 +240,64 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                       ?["thumbnail"] ??
                                   "https://placehold.co/600x400";
 
-                              return Card(
-                                elevation: 4,
-                                margin: const EdgeInsets.symmetric(
-                                    horizontal: 3, vertical: 3),
-                                child: Column(
-                                  children: [
-                                    vSizedBox0,
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: CachedNetworkImage(
-                                        imageUrl: thumbnail,
-                                        width: 150,
-                                        height: 110,
-                                        fit: BoxFit.cover,
-                                        placeholder: (context, url) => SizedBox(
-                                          child: Shimmer.fromColors(
-                                            baseColor: Colors.grey[300]!,
-                                            highlightColor: Colors.grey[100]!,
-                                            child: Container(
-                                              height: 150,
-                                              width: 120,
-                                              margin:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 10),
-                                              decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-                                                color: Colors.white,
+                              return GestureDetector(
+                                onTap: () {
+                                  Get.to(BookDetailsScreen(
+                                      book:
+                                          bookController.popularBooks[index]));
+                                },
+                                child: Card(
+                                  elevation: 4,
+                                  margin: const EdgeInsets.symmetric(
+                                      horizontal: 3, vertical: 3),
+                                  child: Column(
+                                    children: [
+                                      vSizedBox0,
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: CachedNetworkImage(
+                                          imageUrl: thumbnail,
+                                          width: 150,
+                                          height: 110,
+                                          fit: BoxFit.cover,
+                                          placeholder: (context, url) =>
+                                              SizedBox(
+                                            child: Shimmer.fromColors(
+                                              baseColor: Colors.grey[300]!,
+                                              highlightColor: Colors.grey[100]!,
+                                              child: Container(
+                                                height: 150,
+                                                width: 120,
+                                                margin:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 10),
+                                                decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                  color: Colors.white,
+                                                ),
                                               ),
                                             ),
                                           ),
-                                        ),
-                                        errorWidget: (context, url, error) =>
-                                            Container(
-                                          width: 150,
-                                          height: 120,
-                                          color: Colors.grey.shade200,
-                                          child: Icon(Icons.book,
-                                              color: Colors.grey.shade600),
+                                          errorWidget: (context, url, error) =>
+                                              Container(
+                                            width: 150,
+                                            height: 120,
+                                            color: Colors.grey.shade200,
+                                            child: Icon(Icons.book,
+                                                color: Colors.grey.shade600),
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    vSizedBox0,
-                                    Padding(
-                                      padding: const EdgeInsets.all(10),
-                                      child: Text(title,
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis),
-                                    ),
-                                  ],
+                                      vSizedBox0,
+                                      Padding(
+                                        padding: const EdgeInsets.all(10),
+                                        child: Text(title,
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               );
                             },
@@ -325,7 +347,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                           "No books found for $category. Please check your internet connection!!!"));
                                 }
                                 if (bookController.isBooksLoading.value) {
-                                  // Placeholder list of empty items for the skeleton to render
+                                  // Placeholder until the data loads
                                   return Skeletonizer(
                                     enabled: true,
                                     child: ListView.builder(
@@ -427,6 +449,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                           Get.snackbar(
                                             "Update",
                                             "Your Favorite List Has Been Updated Successfully!!!",
+                                            colorText: Colors.blue,
                                             duration:
                                                 const Duration(seconds: 2),
                                             snackPosition: SnackPosition.BOTTOM,

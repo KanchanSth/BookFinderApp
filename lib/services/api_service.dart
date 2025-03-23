@@ -9,7 +9,7 @@ class ApiService {
   Future<List<dynamic>> fetchBooks(
       {required String subject, int? maxResults = 10}) async {
     final url = Uri.parse("${ApiUrl.baseUrl}$subject&maxResults=$maxResults");
-    print("Fetching books from URL: $url");
+    print("URL: $url");
 
     try {
       final response = await http.get(url);

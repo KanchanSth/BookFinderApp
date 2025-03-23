@@ -32,6 +32,7 @@ class BookController extends GetxController {
     super.onClose();
   }
 
+//detect internet restoration
   void _listenToInternetRestoration() {
     _connectivitySubscription = Connectivity()
         .onConnectivityChanged
@@ -39,6 +40,7 @@ class BookController extends GetxController {
       if (results.isNotEmpty) {
         // If any type of connection is available, setting isOffline to false
         isOffline.value = false;
+        errorMessage.value = "";
         fetchPopularBooks();
         if (lastQueriedCategory != null) {
           fetchBooks(lastQueriedCategory!);
@@ -94,6 +96,7 @@ class BookController extends GetxController {
           final fetchedBooks = await ApiService().fetchBooks(subject: query);
           await bookDataBox.put(query, fetchedBooks); // Cache the new data
           books.assignAll(fetchedBooks);
+          errorMessage.value = "";
         } catch (e) {
           // Handle other errors
           errorMessage.value = "Error: $e";
@@ -104,6 +107,7 @@ class BookController extends GetxController {
         final cachedBooks = bookDataBox.get(query);
         if (cachedBooks != null) {
           books.assignAll(cachedBooks);
+          errorMessage.value = "";
         } else {
           errorMessage.value =
               "No internet connection and no cached data available for $query";
@@ -128,11 +132,13 @@ class BookController extends GetxController {
 
       if (isOnline) {
         // Online - fetch new data
+
         try {
           final fetchedPopularBooks = await ApiService()
               .fetchBooks(subject: "Technology", maxResults: 3);
           await popularBookDataBox.put('popular', fetchedPopularBooks);
           popularBooks.assignAll(fetchedPopularBooks);
+          errorMessage.value = "";
         } catch (e) {
           // Handle other errors
           errorMessage.value = "Error: $e";
@@ -143,6 +149,7 @@ class BookController extends GetxController {
         final cachedBooks = popularBookDataBox.get('popular');
         if (cachedBooks != null) {
           popularBooks.assignAll(cachedBooks);
+          errorMessage.value = "";
         } else {
           errorMessage.value = "No cached popular books available";
           popularBooks.clear();

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'screens/home_screen.dart';
@@ -8,13 +9,25 @@ import 'controllers/book_controller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // initialize Hive for Flutter
   await Hive.initFlutter();
+
+//container
   await Hive.openBox('book_data');
   await Hive.openBox('favorite_book_data');
   await Hive.openBox('popular_book_data');
+
+//controllers initialize
   Get.put(ThemeController());
   Get.put(BookController());
 
+  //to restrict the screen orientation to only portrait mode
+  SystemChrome.setPreferredOrientations(
+    [
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ],
+  );
   runApp(const MyApp());
 }
 
